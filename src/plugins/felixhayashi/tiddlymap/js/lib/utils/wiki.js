@@ -1,4 +1,4 @@
-// @preserve
+/* @preserve TW-Guard */
 /*\
 
 title: $:/plugins/felixhayashi/tiddlymap/js/lib/utils/wiki
@@ -8,6 +8,7 @@ module-type: library
 @preserve
 
 \*/
+/* @preserve TW-Guard */
 
 /*** Imports *******************************************************/
 
@@ -767,6 +768,15 @@ export const addTiddler = (tiddler, isForce) => {
 
 };
 
-export const touch = tRef => {
-  setField(tRef, 'modified', new Date());
+export const touch = tiddler => {
+  if (!tiddler) {
+    return;
+  }
+
+  const tObj = new $tw.Tiddler(
+    getTiddler(tiddler),
+    $tw.wiki.getModificationFields()
+  );
+
+  $tw.wiki.addTiddler(tObj);
 };

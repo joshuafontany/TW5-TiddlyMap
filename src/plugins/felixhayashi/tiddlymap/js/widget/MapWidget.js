@@ -1,4 +1,4 @@
-// @preserve
+/* @preserve TW-Guard */
 /*\
 
 title: $:/plugins/felixhayashi/tiddlymap/js/widget/MapWidget
@@ -8,6 +8,7 @@ module-type: widget
 @preserve
 
 \*/
+/* @preserve TW-Guard */
 
 /*** Imports *******************************************************/
 
@@ -1526,12 +1527,17 @@ class MapWidget extends Widget {
   createAndSaveSnapshot(title) {
 
     const tRef = title || this.view.getRoot() + '/snapshot';
-    $tw.wiki.addTiddler(new $tw.Tiddler({
-      title: tRef,
-      type: 'image/png',
-      text: this.getSnapshot(true),
-      modified: new Date()
-    }));
+    $tw.wiki.addTiddler(
+      new $tw.Tiddler(
+        {
+          title: tRef,
+          type: 'image/png',
+          text: this.getSnapshot(true)
+        },
+        $tw.wiki.getCreationFields(),
+        $tw.wiki.getModificationFields()
+      )
+    );
 
     return tRef;
 

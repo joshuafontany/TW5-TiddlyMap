@@ -72,14 +72,13 @@ import { argv } from 'yargs';
 import del from 'del';
 import exists from 'is-there'; // why on earth is fs.exists depreciated anyway by node?
 import SemVer from 'semver';
-import runSequence from 'run-sequence'; // once gulp 4.0 is out: remove runSequence and update
 import beep from 'beepbeep';
 import gulp from 'gulp';
 import gulpif from 'gulp-if';
 import babel from 'gulp-babel';
 import sass from 'gulp-sass';
 import replace from 'gulp-replace';
-import uglify from 'gulp-uglify';
+import terser from 'gulp-terser';
 import jsdoc from 'gulp-jsdoc3';
 import esprima from 'gulp-esprima';
 import debug from 'gulp-debug';
@@ -203,7 +202,9 @@ gulp.task('compile and move scripts', () => {
 
   const uglifyOpts = {
     compress: false, // no further optimization
-    preserveComments: 'some',
+    output: {
+      comments: 'some',
+    }
   };
 
   const sourceMapOpts = {
@@ -214,7 +215,7 @@ gulp.task('compile and move scripts', () => {
   return gulp.src(pluginSrc + '/**/*.js')
     .pipe(sourcemaps.init())
     .pipe(babel())
-    .pipe(gulpif (argv.production, uglify(uglifyOpts)))
+    .pipe(gulpif (argv.production, terser(uglifyOpts)))
     .pipe(sourcemaps.write('./maps', sourceMapOpts))
     .pipe(gulp.dest(outPath.dist));
 
@@ -293,20 +294,18 @@ gulp.task('bundle the plugin', (cb) => {
 /**
  * Execute the default task.
  */
-gulp.task('default', (cb) => {
-
-  runSequence(
+gulp.task(
+  'default',
+  gulp.series(
     'Javascript validation',
     'perform cleanup',
     'bump version',
-    [
+    gulp.parallel(
       'create docs',
       'copy vanilla files',
       'compile and move styles',
       'compile and move scripts'
-    ],
+    ),
     'bundle the plugin',
-    cb
-  );
-
-});
+  )
+);
